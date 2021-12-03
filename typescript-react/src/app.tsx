@@ -1,6 +1,8 @@
 import * as React from "react"
 import * as ReactDOM from 'react-dom'
 import craftXIconSrc from "./craftx-icon.png"
+import { TokenForm } from './views/TokenForm';
+import { Env } from './Env'
 
 const App: React.FC<{}> = () => {
   const isDarkMode = useCraftDarkMode();
@@ -13,16 +15,32 @@ const App: React.FC<{}> = () => {
     }
   }, [isDarkMode]);
 
-  return <div style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  }}>
-    <img className="icon" src={craftXIconSrc} alt="CraftX logo" />
-    <button className={`btn ${isDarkMode ? "dark" : ""}`} onClick={insertHelloWorld}>
-      Hello world!
-    </button>
-  </div>;
+  const [userAccessToken, setAccessToken] = React.useState('');
+  React.useEffect(() => {
+    const search = new URLSearchParams(location.search)
+    const maybeCode = search.get('code');
+    maybeCode && setAccessToken(maybeCode)
+  }, [location.search])
+
+  const env = React.useMemo(() => ({
+    userAccessToken,
+  }), [userAccessToken]);
+
+  return (
+    <Env.Provider value={env}>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}>
+        <TokenForm />
+        <img className="icon" src={craftXIconSrc} alt="CraftX logo" />
+        <button className={`btn ${isDarkMode ? "dark" : ""}`} onClick={insertHelloWorld}>
+          Hello world!
+        </button>
+      </div>
+    </Env.Provider>
+  );
 }
 
 function useCraftDarkMode() {
